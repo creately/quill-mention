@@ -1,13 +1,7 @@
-import Quill from "quill";
-import Keys from "./constants";
-import {
-  attachDataValues,
-  getMentionCharIndex,
-  hasValidChars,
-  hasValidMentionCharIndex
-} from "./utils";
+import Quill from "@creately/quill";
+import { attachDataValues } from "./utils";
 import "./quill.mention.css";
-import "./blots/mention";
+//import "./blots/mention";
 
 class Mention {
   constructor(quill, options) {
@@ -37,10 +31,10 @@ class Mention {
         insertItem(item);
       },
       mentionDenotationChars: ["@"],
-      showDenotationChar: true,
+      showDenotationChar: false,
       allowedChars: /^[a-zA-Z0-9_]*$/,
       minChars: 0,
-      maxChars: 31,
+      maxChars: 10000,
       offsetTop: 2,
       offsetLeft: 0,
       isolateCharacter: false,
@@ -48,7 +42,14 @@ class Mention {
       positioningStrategy: "normal",
       defaultMenuOrientation: "bottom",
       blotName: "mention",
-      dataAttributes: ["id", "value", "denotationChar", "link", "target", "disabled"],
+      dataAttributes: [
+        "id",
+        "value",
+        "denotationChar",
+        "link",
+        "target",
+        "disabled",
+      ],
       linkTarget: "_blank",
       onOpen() {
         return true;
@@ -60,13 +61,13 @@ class Mention {
       listItemClass: "ql-mention-list-item",
       mentionContainerClass: "ql-mention-list-container",
       mentionListClass: "ql-mention-list",
-      spaceAfterInsert: true
+      spaceAfterInsert: false,
     };
 
     Object.assign(this.options, options, {
       dataAttributes: Array.isArray(options.dataAttributes)
         ? this.options.dataAttributes.concat(options.dataAttributes)
-        : this.options.dataAttributes
+        : this.options.dataAttributes,
     });
 
     //create mention container
@@ -92,41 +93,41 @@ class Mention {
 
     quill.keyboard.addBinding(
       {
-        key: Keys.TAB
+        key: "Tab",
       },
       this.selectHandler.bind(this)
     );
-    quill.keyboard.bindings[Keys.TAB].unshift(
-      quill.keyboard.bindings[Keys.TAB].pop()
+    quill.keyboard.bindings["Tab"].unshift(
+      quill.keyboard.bindings["Tab"].pop()
     );
 
     quill.keyboard.addBinding(
       {
-        key: Keys.ENTER
+        key: "Enter",
       },
       this.selectHandler.bind(this)
     );
-    quill.keyboard.bindings[Keys.ENTER].unshift(
-      quill.keyboard.bindings[Keys.ENTER].pop()
+    quill.keyboard.bindings["Enter"].unshift(
+      quill.keyboard.bindings["Enter"].pop()
     );
 
     quill.keyboard.addBinding(
       {
-        key: Keys.ESCAPE
+        key: "Escape",
       },
       this.escapeHandler.bind(this)
     );
 
     quill.keyboard.addBinding(
       {
-        key: Keys.UP
+        key: "ArrowUp",
       },
       this.upHandler.bind(this)
     );
 
     quill.keyboard.addBinding(
       {
-        key: Keys.DOWN
+        key: "ArrowDown",
       },
       this.downHandler.bind(this)
     );
@@ -192,7 +193,10 @@ class Mention {
       this.mentionList.childNodes[i].classList.remove("selected");
     }
 
-    if (this.itemIndex === -1 || this.mentionList.childNodes[this.itemIndex].dataset.disabled === "true") {
+    if (
+      this.itemIndex === -1 ||
+      this.mentionList.childNodes[this.itemIndex].dataset.disabled === "true"
+    ) {
       return;
     }
 
@@ -271,13 +275,24 @@ class Mention {
     } else {
       insertAtPos = this.cursorPos;
     }
-    this.quill.insertEmbed(insertAtPos, this.options.blotName, render, Quill.sources.USER);
+    //this.quill.insertEmbed(insertAtPos, this.options.blotName, render, Quill.sources.USER);
+    this.quill.insertText(insertAtPos, render.value, Quill.sources.USER);
     if (this.options.spaceAfterInsert) {
-      this.quill.insertText(insertAtPos + 1, " ", Quill.sources.USER);
+      this.quill.insertText(
+        insertAtPos + render.value.length,
+        " ",
+        Quill.sources.USER
+      );
       // setSelection here sets cursor position
-      this.quill.setSelection(insertAtPos + 2, Quill.sources.USER);
+      this.quill.setSelection(
+        insertAtPos + render.value.length + 1,
+        Quill.sources.USER
+      );
     } else {
-      this.quill.setSelection(insertAtPos + 1, Quill.sources.USER);
+      this.quill.setSelection(
+        insertAtPos + render.value.length,
+        Quill.sources.USER
+      );
     }
     this.hideMentionList();
   }
@@ -326,7 +341,10 @@ class Mention {
       return;
     }
 
-    if (this.mentionContainer.getElementsByClassName("ql-mention-loading").length > 0) {
+    if (
+      this.mentionContainer.getElementsByClassName("ql-mention-loading")
+        .length > 0
+    ) {
       this.showMentionList();
       return;
     }
@@ -340,7 +358,9 @@ class Mention {
   }
 
   removeLoading() {
-    var loadingDiv = this.mentionContainer.getElementsByClassName("ql-mention-loading");
+    var loadingDiv = this.mentionContainer.getElementsByClassName(
+      "ql-mention-loading"
+    );
     if (loadingDiv.length > 0) {
       loadingDiv[0].remove();
     }
@@ -394,7 +414,8 @@ class Mention {
     do {
       increment++;
       newIndex = (this.itemIndex + increment) % this.values.length;
-      var disabled = this.mentionList.childNodes[newIndex].dataset.disabled === "true";
+      var disabled =
+        this.mentionList.childNodes[newIndex].dataset.disabled === "true";
       if (increment === this.values.length + 1) {
         //we've wrapped around w/o finding an enabled item
         newIndex = -1;
@@ -413,8 +434,10 @@ class Mention {
 
     do {
       decrement++;
-      newIndex = (this.itemIndex + this.values.length - decrement) % this.values.length;
-      var disabled = this.mentionList.childNodes[newIndex].dataset.disabled === "true";
+      newIndex =
+        (this.itemIndex + this.values.length - decrement) % this.values.length;
+      var disabled =
+        this.mentionList.childNodes[newIndex].dataset.disabled === "true";
       if (decrement === this.values.length + 1) {
         //we've wrapped around w/o finding an enabled item
         newIndex = -1;
@@ -530,12 +553,12 @@ class Mention {
     }
 
     if (topPos >= 0) {
-      this.options.mentionContainerClass.split(' ').forEach(className => {
+      this.options.mentionContainerClass.split(" ").forEach((className) => {
         this.mentionContainer.classList.add(`${className}-bottom`);
         this.mentionContainer.classList.remove(`${className}-top`);
       });
     } else {
-      this.options.mentionContainerClass.split(' ').forEach(className => {
+      this.options.mentionContainerClass.split(" ").forEach((className) => {
         this.mentionContainer.classList.add(`${className}-top`);
         this.mentionContainer.classList.remove(`${className}-bottom`);
       });
@@ -560,7 +583,9 @@ class Mention {
     };
 
     //Which rectangle should it be relative to
-    const relativeToPos = this.options.fixMentionsToQuill ? containerPos : mentionCharPosAbsolute;
+    const relativeToPos = this.options.fixMentionsToQuill
+      ? containerPos
+      : mentionCharPosAbsolute;
 
     let topPos = this.options.offsetTop;
     let leftPos = this.options.offsetLeft;
@@ -573,15 +598,24 @@ class Mention {
       leftPos += relativeToPos.left;
 
       //if its off the righ edge, push it back
-      if (leftPos + this.mentionContainer.offsetWidth > document.documentElement.clientWidth) {
-        leftPos -= leftPos + this.mentionContainer.offsetWidth - document.documentElement.clientWidth;
+      if (
+        leftPos + this.mentionContainer.offsetWidth >
+        document.documentElement.clientWidth
+      ) {
+        leftPos -=
+          leftPos +
+          this.mentionContainer.offsetWidth -
+          document.documentElement.clientWidth;
       }
     }
 
     const availableSpaceTop = relativeToPos.top;
-    const availableSpaceBottom = document.documentElement.clientHeight - (relativeToPos.top + relativeToPos.height);
+    const availableSpaceBottom =
+      document.documentElement.clientHeight -
+      (relativeToPos.top + relativeToPos.height);
 
-    const fitsBottom = this.mentionContainer.offsetHeight <= availableSpaceBottom;
+    const fitsBottom =
+      this.mentionContainer.offsetHeight <= availableSpaceBottom;
     const fitsTop = this.mentionContainer.offsetHeight <= availableSpaceTop;
 
     var placement;
@@ -628,7 +662,7 @@ class Mention {
   }
 
   getTextBeforeCursor() {
-    const startPos = Math.max(0, this.cursorPos - this.options.maxChars);
+    const startPos = 0;
     const textBeforeCursorPos = this.quill.getText(
       startPos,
       this.cursorPos - startPos
@@ -640,51 +674,28 @@ class Mention {
     const range = this.quill.getSelection();
     if (range == null) return;
 
-    this.cursorPos = range.index;
+    this.mentionCharPos = this.cursorPos = range.index;
     const textBeforeCursor = this.getTextBeforeCursor();
-    const { mentionChar, mentionCharIndex } = getMentionCharIndex(
-      textBeforeCursor,
-      this.options.mentionDenotationChars
-    );
+    //this.hideMentionList();
 
-    if (
-        hasValidMentionCharIndex(
-          mentionCharIndex,
-          textBeforeCursor,
-          this.options.isolateCharacter
-        )
-      ) {
-      const mentionCharPos = this.cursorPos - (textBeforeCursor.length - mentionCharIndex);
-      this.mentionCharPos = mentionCharPos;
-      const textAfter = textBeforeCursor.substring(
-        mentionCharIndex + mentionChar.length
-      );
-      if (
-        textAfter.length >= this.options.minChars &&
-        hasValidChars(textAfter, this.getAllowedCharsRegex(mentionChar))
-      ) {
-        if (this.existingSourceExecutionToken) {
-          this.existingSourceExecutionToken.abandoned = true;
-        }
-        this.renderLoading();
-        var sourceRequestToken = {
-          abandoned: false,
-        };
-        this.existingSourceExecutionToken = sourceRequestToken;
-        this.options.source(
-          textAfter,
-          (data, searchTerm) => {
-            if (sourceRequestToken.abandoned) {
-              return;
-            }
-            this.existingSourceExecutionToken = null;
-            this.renderList(mentionChar, data, searchTerm);
-          },
-          mentionChar
-        );
-      } else {
-        this.hideMentionList();
+    if ( textBeforeCursor.length >= this.options.minChars ) {
+      if (this.existingSourceExecutionToken) {
+        this.existingSourceExecutionToken.abandoned = true;
       }
+      this.renderLoading();
+      var sourceRequestToken = {
+        abandoned: false,
+      };
+      this.existingSourceExecutionToken = sourceRequestToken;
+      this.options.source(textBeforeCursor, (data, searchTerm) => {
+        if (sourceRequestToken.abandoned) {
+          return;
+        }
+        searchTerm = searchTerm || '';
+        this.existingSourceExecutionToken = null;
+        this.mentionCharPos = this.cursorPos - searchTerm.length;
+        this.renderList("@", data, searchTerm);
+      });
     } else {
       this.hideMentionList();
     }
