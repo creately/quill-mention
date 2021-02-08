@@ -6,6 +6,8 @@
   box-shadow: 0 2px 12px 0 rgba(30, 30, 30, 0.08);
   z-index: 9001;
   overflow: auto;
+  min-width: 150px;
+  width: fit-content;
 }
 
 .ql-mention-loading {
@@ -35,7 +37,8 @@
 }
 
 .ql-mention-list-item.selected {
-  background-color: #d3e1eb;
+  background-color: transparent;
+  color: #FFC648;
   text-decoration: none;
 }
 
