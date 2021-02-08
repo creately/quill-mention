@@ -1,6 +1,6 @@
 {
   "name": "@creately/quill-mention",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "@mentions for the Quill rich text editor",
   "main": "dist/quill.mention.csj.js",
   "module": "dist/quill.mention.esm.js",
@@ -41,7 +41,7 @@
     "start": "concurrently \"rollup -c -w\" \"serve docs\"",
     "build": "rollup -c",
     "test": "ava",
-    "prepare": "npm run build"
+    "prepublishOnly": "npm run build"
   },
   "ava": {
     "require": [
