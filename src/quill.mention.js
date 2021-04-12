@@ -716,11 +716,7 @@ class Mention {
   }
 
   onSelectionChange(range) {
-    if (range && range.length === 0) {
-      this.onSomethingChange();
-    } else {
-      this.hideMentionList();
-    }
+    this.hideMentionList();
   }
 
   openMenu(denotationChar) {
